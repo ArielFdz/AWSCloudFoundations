@@ -51,5 +51,55 @@ namespace AWSCloudFoundations.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> PostStudent([FromBody] StudentCreateDTO studentCreate)
+        {
+            try
+            {
+                service.PostStudent(studentCreate);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                var response = new ResponseError();
+                response.message = ex.Message;
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> PutStudent(int id, [FromBody] StudentCreateDTO studentUpdate)
+        {
+            try
+            {
+                var bDelete = service.PutStudent(id, studentUpdate);
+                if (!bDelete) return NotFound();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                var response = new ResponseError();
+                response.message = ex.Message;
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteStudent(int id)
+        {
+            try
+            {
+                var bDelete = service.DeleteStudent(id);
+                if (!bDelete) return NotFound();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                var response = new ResponseError();
+                response.message = ex.Message;
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
+
     }
 }

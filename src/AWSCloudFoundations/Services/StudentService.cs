@@ -1,6 +1,8 @@
 using AutoMapper;
 using AWSCloudFoundations.Data.DTOs;
+using AWSCloudFoundations.Data.Entities;
 using AWSCloudFoundations.Data.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AWSCloudFoundations.Services
 {
@@ -8,6 +10,9 @@ namespace AWSCloudFoundations.Services
     {
         List<StudentDTO> GetStudents();
         StudentDTO GetStudentById(int id);
+        void PostStudent(StudentCreateDTO studentCreate);
+        bool PutStudent(int id, StudentCreateDTO studentUpdate);
+        bool DeleteStudent(int id);
     }
 
     public class StudentService : IStudentService
@@ -21,6 +26,14 @@ namespace AWSCloudFoundations.Services
             this.mapper = mapper;
         }
 
+        public List<StudentDTO> GetStudents()
+        {
+            var studentsEntity = repository.GetStudents().ToList();
+            var students = mapper.Map<List<StudentDTO>>(studentsEntity);
+            return students;
+
+        }
+
         public StudentDTO GetStudentById(int id)
         {
             var studentEntity = repository.GetStudentById(id);
@@ -28,12 +41,30 @@ namespace AWSCloudFoundations.Services
             return student;
         }
 
-        public List<StudentDTO> GetStudents()
+        public void PostStudent(StudentCreateDTO studentCreate)
         {
-            var studentsEntity = repository.GetStudents().ToList();   
-            var students = mapper.Map<List<StudentDTO>>(studentsEntity);
-            return students;
+            var lstStudents = repository.GetStudents().ToList();
 
+            var student = mapper.Map<Student>(studentCreate);
+            student.Id = lstStudents.Count > 0 ? lstStudents.Max(x => x.Id) + 1 : 1;
+
+            repository.PostStudent(student);
+        }
+
+        public bool PutStudent(int id, StudentCreateDTO studentUpdate)
+        {
+            return repository.PutStudent(id, studentUpdate);
+        }
+
+        public bool DeleteStudent(int id)
+        {
+            var studentEntity = repository.GetStudentById(id);
+            if (studentEntity != null)
+            {
+                repository.DeleteStudent(studentEntity);
+                return true;
+            }
+            return false;
         }
     }
 }
