@@ -6,7 +6,7 @@ namespace AWSCloudFoundations.Helpers
 {
     public class AutoMapper : Profile
     {
-        public AutoMapper() 
+        public AutoMapper()
         {
             CreateMap<Student, StudentDTO>()
                 .ForMember(x => x.Nombres, opt => opt.MapFrom(src => src.Names))
@@ -25,6 +25,12 @@ namespace AWSCloudFoundations.Helpers
                 .ForMember(x => x.Nombres, opt => opt.MapFrom(src => src.Names))
                 .ForMember(x => x.Apellidos, opt => opt.MapFrom(src => src.Surnames))
                 .ForMember(x => x.HorasClase, opt => opt.MapFrom(src => src.ClassHours));
+
+            CreateMap<TeacherCreateDTO, Teacher>()
+                .ForMember(x => x.EmployeeNumber, opt => opt.MapFrom(src => src.NumeroEmpleado))
+                .ForMember(x => x.Names, opt => opt.MapFrom(src => src.Nombres))
+                .ForMember(x => x.Surnames, opt => opt.MapFrom(src => src.Apellidos))
+                .ForMember(x => x.ClassHours, opt => opt.MapFrom(src => src.HorasClase));
         }
     }
 }

@@ -1,7 +1,5 @@
-
 using AWSCloudFoundations.Data.DTOs;
 using AWSCloudFoundations.Data.Entities;
-using Microsoft.VisualBasic;
 
 namespace AWSCloudFoundations.Data.Repositories
 {
@@ -27,7 +25,7 @@ namespace AWSCloudFoundations.Data.Repositories
         {
             return students.FirstOrDefault(x => x.Id == id);
         }
-    
+
         public void PostStudent(Student student)
         {
             students.Add(student);

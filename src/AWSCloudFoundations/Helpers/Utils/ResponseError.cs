@@ -1,4 +1,3 @@
-
 namespace AWSCloudFoundations.Helpers.Utils
 {
     public class ResponseError

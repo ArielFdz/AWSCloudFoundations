@@ -2,7 +2,6 @@ using AutoMapper;
 using AWSCloudFoundations.Data.DTOs;
 using AWSCloudFoundations.Data.Entities;
 using AWSCloudFoundations.Data.Repositories;
-using Microsoft.AspNetCore.Mvc;
 
 namespace AWSCloudFoundations.Services
 {
