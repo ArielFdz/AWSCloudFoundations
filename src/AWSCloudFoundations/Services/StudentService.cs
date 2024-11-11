@@ -9,8 +9,8 @@ namespace AWSCloudFoundations.Services
     {
         List<StudentDTO> GetStudents();
         StudentDTO GetStudentById(int id);
-        void PostStudent(StudentCreateDTO studentCreate);
-        bool PutStudent(int id, StudentCreateDTO studentUpdate);
+        void PostStudent(StudentDTO studentCreate);
+        bool PutStudent(int id, StudentDTO studentUpdate);
         bool DeleteStudent(int id);
     }
 
@@ -40,17 +40,13 @@ namespace AWSCloudFoundations.Services
             return student;
         }
 
-        public void PostStudent(StudentCreateDTO studentCreate)
+        public void PostStudent(StudentDTO studentCreate)
         {
-            var lstStudents = repository.GetStudents().ToList();
-
             var student = mapper.Map<Student>(studentCreate);
-            student.Id = lstStudents.Count > 0 ? lstStudents.Max(x => x.Id) + 1 : 1;
-
             repository.PostStudent(student);
         }
 
-        public bool PutStudent(int id, StudentCreateDTO studentUpdate)
+        public bool PutStudent(int id, StudentDTO studentUpdate)
         {
             return repository.PutStudent(id, studentUpdate);
         }

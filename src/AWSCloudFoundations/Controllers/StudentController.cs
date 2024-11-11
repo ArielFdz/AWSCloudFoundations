@@ -17,88 +17,41 @@ namespace AWSCloudFoundations.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetStudents()
+        public IActionResult GetStudents()
         {
-            try
-            {
-                var response = new ResponseData<List<StudentDTO>>();
-                response.data = service.GetStudents();
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                var response = new ResponseError();
-                response.message = ex.Message;
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
+            var listStudents = service.GetStudents();
+            return Ok(listStudents);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetStudentById(int id)
+        public IActionResult GetStudentById(int id)
         {
-            try
-            {
-                var response = new ResponseData<StudentDTO>();
-                response.data = service.GetStudentById(id);
-                if (response.data == null) return NotFound();
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                var response = new ResponseError();
-                response.message = ex.Message;
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
+            var student = service.GetStudentById(id);
+            if (student == null) return NotFound();
+            return Ok(student);
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostStudent([FromBody] StudentCreateDTO studentCreate)
+        public IActionResult PostStudent([FromBody] StudentDTO studentCreate)
         {
-            try
-            {
-                service.PostStudent(studentCreate);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                var response = new ResponseError();
-                response.message = ex.Message;
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
+            service.PostStudent(studentCreate);
+            return CreatedAtAction(nameof(GetStudentById), new { id = studentCreate.Id }, new ResponseData<StudentDTO> { data = studentCreate });
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> PutStudent(int id, [FromBody] StudentCreateDTO studentUpdate)
+        public IActionResult PutStudent(int id, [FromBody] StudentDTO studentUpdate)
         {
-            try
-            {
-                var bDelete = service.PutStudent(id, studentUpdate);
-                if (!bDelete) return NotFound();
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                var response = new ResponseError();
-                response.message = ex.Message;
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
+            var bDelete = service.PutStudent(id, studentUpdate);
+            if (!bDelete) return NotFound();
+            return Ok(new { message = "Alumno actualizado exitosamente" });
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteStudent(int id)
+        public IActionResult DeleteStudent(int id)
         {
-            try
-            {
-                var bDelete = service.DeleteStudent(id);
-                if (!bDelete) return NotFound();
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                var response = new ResponseError();
-                response.message = ex.Message;
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
+            var bDelete = service.DeleteStudent(id);
+            if (!bDelete) return NotFound();
+            return Ok();
         }
 
     }

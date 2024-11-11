@@ -8,7 +8,7 @@ namespace AWSCloudFoundations.Data.Repositories
         List<Teacher> GetTeachers();
         Teacher GetTeacherById(int id);
         void PostTeacher(Teacher teacher);
-        bool PutTeacher(int id, TeacherCreateDTO teacherUpdate);
+        bool PutTeacher(int id, TeacherDTO teacherUpdate);
         void DeleteTeacher(Teacher teacher);
     }
 
@@ -31,7 +31,7 @@ namespace AWSCloudFoundations.Data.Repositories
             teachers.Add(teacher);
         }
 
-        public bool PutTeacher(int id, TeacherCreateDTO teacherUpdate)
+        public bool PutTeacher(int id, TeacherDTO teacherUpdate)
         {
             var teacher = teachers.FirstOrDefault(x => x.Id == id);
 

@@ -8,7 +8,7 @@ namespace AWSCloudFoundations.Data.Repositories
         List<Student> GetStudents();
         Student GetStudentById(int id);
         void PostStudent(Student student);
-        bool PutStudent(int id, StudentCreateDTO updatedStudent);
+        bool PutStudent(int id, StudentDTO updatedStudent);
         void DeleteStudent(Student student);
     }
 
@@ -31,7 +31,7 @@ namespace AWSCloudFoundations.Data.Repositories
             students.Add(student);
         }
 
-        public bool PutStudent(int id, StudentCreateDTO updatedStudent)
+        public bool PutStudent(int id, StudentDTO updatedStudent)
         {
             var student = students.FirstOrDefault(x => x.Id == id);
 
