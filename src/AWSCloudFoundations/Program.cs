@@ -25,6 +25,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapGet("/", () => "Hola papu, soy una api!");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
