@@ -40,7 +40,8 @@ namespace AWSCloudFoundations.Controllers
                 apellidos = p.apellidos,
                 matricula = p.matricula,
                 promedio = p.promedio,
-                fotoPerfilUrl = p.fotoPerfilUrl
+                fotoPerfilUrl = p.fotoPerfilUrl,
+                password = p.password
             }).ToList(), 200);
 
             return new ObjectResult(response)
@@ -66,7 +67,8 @@ namespace AWSCloudFoundations.Controllers
                 apellidos = alumno.apellidos,
                 matricula = alumno.matricula,
                 promedio = alumno.promedio,
-                fotoPerfilUrl = alumno.fotoPerfilUrl
+                fotoPerfilUrl = alumno.fotoPerfilUrl,
+                password = alumno.password
             };
 
             return Ok(responseProfesor);
@@ -93,7 +95,8 @@ namespace AWSCloudFoundations.Controllers
                 nombres = alumno.nombres,
                 apellidos = alumno.apellidos,
                 matricula = alumno.matricula,
-                promedio = alumno.promedio
+                promedio = alumno.promedio,
+                password = alumno.password
             };
             return CreatedAtAction(nameof(GetAlumnoById), new { id = alumno.id }, response);
         }
@@ -113,6 +116,7 @@ namespace AWSCloudFoundations.Controllers
             alumno.apellidos = alumnoDto.apellidos;
             alumno.matricula = alumnoDto.matricula;
             alumno.promedio = alumnoDto.promedio;
+            alumno.password = alumnoDto.password;
 
             await _context.SaveChangesAsync();
 
@@ -122,7 +126,8 @@ namespace AWSCloudFoundations.Controllers
                 nombres = alumno.nombres,
                 apellidos = alumno.apellidos,
                 matricula = alumno.matricula,
-                promedio = alumno.promedio
+                promedio = alumno.promedio,
+                password = alumno.password
             }, 200);
 
             return new ObjectResult(successResponse) { StatusCode = successResponse.StatusCode };
@@ -201,6 +206,7 @@ namespace AWSCloudFoundations.Controllers
         [Range(0.0, 100.0, ErrorMessage = "El campo 'promedio' debe ser un número decimal mayor o igual a 0 y menor o igual a 100")]
         public double promedio { get; set; }
         public string? fotoPerfilUrl { get; set; }
+        public string? password { get; set; }
     }
 
     public class CreateAlumnoDTO
@@ -216,6 +222,7 @@ namespace AWSCloudFoundations.Controllers
 
         [Range(0.0, 100.0, ErrorMessage = "El campo 'promedio' debe ser un número decimal mayor o igual a 0 y menor o igual a 100")]
         public double promedio { get; set; }
+        public string? password { get; set; }
     }
 
     public class UpdateAlumnoDTO
@@ -231,6 +238,7 @@ namespace AWSCloudFoundations.Controllers
 
         [Range(0.0, 100.0, ErrorMessage = "El campo 'promedio' debe ser un número decimal mayor o igual a 0 y menor o igual a 100")]
         public double promedio { get; set; }
+        public string? password { get; set; }
     }
 
     public class AlumnoResponseDTO
@@ -241,5 +249,6 @@ namespace AWSCloudFoundations.Controllers
         public string matricula { get; set; }
         public double promedio { get; set; }
         public string fotoPerfilUrl { get; set; }
+        public string? password { get; set; }
     }
 }
