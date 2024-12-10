@@ -26,7 +26,7 @@ builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddAWSService<Amazon.SimpleNotificationService.IAmazonSimpleNotificationService>();
-
+builder.Services.AddAWSService<Amazon.DynamoDBv2.IAmazonDynamoDB>();
 
 var app = builder.Build();
 

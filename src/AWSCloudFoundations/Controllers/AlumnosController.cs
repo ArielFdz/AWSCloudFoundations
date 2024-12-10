@@ -9,6 +9,9 @@ using Amazon;
 using Amazon.Runtime;
 using Amazon.SimpleNotificationService.Model;
 using Amazon.SimpleNotificationService;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DocumentModel;
+using Newtonsoft.Json;
 
 namespace AWSCloudFoundations.Controllers
 {
@@ -85,7 +88,8 @@ namespace AWSCloudFoundations.Controllers
                 nombres = alumnoDto.nombres,
                 apellidos = alumnoDto.apellidos,
                 matricula = alumnoDto.matricula,
-                promedio = alumnoDto.promedio
+                promedio = alumnoDto.promedio,
+                password = alumnoDto.password
             };
 
             await _context.Alumnos.AddAsync(alumno);
@@ -235,7 +239,114 @@ namespace AWSCloudFoundations.Controllers
             }
         }
 
+        [HttpPost("{id:int}/session/login")]
+        public async Task<IActionResult> Login(int id, [FromBody] Sesion sesion)
+        {
+            Console.WriteLine("Entra " + id + "   " + sesion.Password);
+            var alumno = await _context.Alumnos.FirstOrDefaultAsync(x => x.id == id);
 
+            if (alumno == null || alumno.password != sesion.Password) // Comparación de contraseña
+            {
+                return BadRequest(new { Message = "Credenciales incorrectas." });
+            }
+
+            var sessionString = GenerateSessionString(128); // Genera un sessionString de 128 dígitos
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+            var document = new Document
+            {
+                ["id"] = Guid.NewGuid().ToString(),
+                ["fecha"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                ["alumnoId"] = id,
+                ["active"] = true,
+                ["sessionString"] = sessionString
+            };
+
+            var dynamoDbClient = new AmazonDynamoDBClient(
+                configuration["AWS:AccessKeyId"],
+                configuration["AWS:SecretAccessKey"],
+                configuration["AWS:SessionToken"],
+                RegionEndpoint.GetBySystemName(configuration["AWS:Region"])
+            );
+
+            // Guardar la sesión en DynamoDB
+            var table = Table.LoadTable(dynamoDbClient, "sesiones-alumnos");
+            await table.PutItemAsync(document);
+
+            return Ok(new { sessionString = sessionString });
+        }
+
+        [HttpPost("{id}/session/verify")]
+        public async Task<IActionResult> VerifySession(int id, [FromBody] SesionSt sesion)
+        {
+            var dynamoDbClient = new AmazonDynamoDBClient(
+               configuration["AWS:AccessKeyId"],
+               configuration["AWS:SecretAccessKey"],
+               configuration["AWS:SessionToken"],
+               RegionEndpoint.GetBySystemName(configuration["AWS:Region"])
+           );
+
+            var table = Table.LoadTable(dynamoDbClient, "sesiones-alumnos");
+
+            // Filtrar sesiones basándote en alumnoId usando Scan (si no hay un índice secundario)
+            var scanFilter = new ScanFilter();
+            scanFilter.AddCondition("alumnoId", ScanOperator.Equal, id);
+
+            var search = table.Scan(scanFilter);
+            var sessions = await search.GetRemainingAsync();
+
+            // Buscar la sesión con el sessionString proporcionado
+            var session = sessions.FirstOrDefault(s => s["sessionString"].AsString() == sesion.sessionString);
+
+            if (session != null && session["active"].AsBoolean())
+            {
+                return Ok( new { sessionString = "Sesión válida." });
+            }
+
+            return BadRequest(new { Message = "Sesión no válida o inactiva." });
+        }
+
+        [HttpPost("{id}/session/logout")]
+        public async Task<IActionResult> Logout(int id, [FromBody] SesionSt sesion)
+        {
+            var dynamoDbClient = new AmazonDynamoDBClient(
+              configuration["AWS:AccessKeyId"],
+              configuration["AWS:SecretAccessKey"],
+              configuration["AWS:SessionToken"],
+              RegionEndpoint.GetBySystemName(configuration["AWS:Region"])
+          );
+
+            var table = Table.LoadTable(dynamoDbClient, "sesiones-alumnos");
+
+            // Filtrar sesiones basándote en alumnoId usando Scan (si no hay un índice secundario)
+            var scanFilter = new ScanFilter();
+            scanFilter.AddCondition("alumnoId", ScanOperator.Equal, id);
+
+            var search = table.Scan(scanFilter);
+            var sessions = await search.GetRemainingAsync();
+
+            // Buscar la sesión con el sessionString proporcionado
+            var session = sessions.FirstOrDefault(s => s["sessionString"].AsString() == sesion.sessionString);
+
+            if (session != null)
+            {
+                // Desactivar la sesión
+                session["active"] = new DynamoDBBool(false);
+                await table.PutItemAsync(session);
+                return Ok(new { Message = "Sesión cerrada." });
+            }
+
+            return BadRequest(new { Message = "Sesión no encontrada." });
+        }
+
+        private static string GenerateSessionString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, length)
+                                        .Select(s => s[random.Next(s.Length)])
+                                        .ToArray());
+        }
     }
 
     public class Alumno
@@ -295,5 +406,15 @@ namespace AWSCloudFoundations.Controllers
         public double promedio { get; set; }
         public string fotoPerfilUrl { get; set; }
         public string? password { get; set; }
+    }
+
+    public class Sesion
+    {
+        public string Password { get; set; }
+    }
+
+    public class  SesionSt
+    {
+        public string sessionString { get; set; }
     }
 }
