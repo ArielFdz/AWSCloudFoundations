@@ -2,6 +2,7 @@ using AWSCloudFoundations.Data;
 using AWSCloudFoundations.Data.Repositories;
 using AWSCloudFoundations.Services;
 using Microsoft.EntityFrameworkCore;
+using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,9 @@ builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
+
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
 
 var app = builder.Build();
 
