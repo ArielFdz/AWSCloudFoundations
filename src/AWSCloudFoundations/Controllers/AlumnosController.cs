@@ -147,9 +147,9 @@ namespace AWSCloudFoundations.Controllers
         }
 
         [HttpPost("{id:int}/fotoPerfil")]
-        public async Task<IActionResult> UploadFotoPerfil(int id, IFormFile fotoPerfil)
+        public async Task<IActionResult> UploadFotoPerfil(int id, IFormFile foto)
         {
-            if (fotoPerfil == null || fotoPerfil.Length == 0)
+            if (foto == null || foto.Length == 0)
             {
                 return BadRequest("No se ha proporcionado ninguna imagen.");
             }
@@ -161,30 +161,24 @@ namespace AWSCloudFoundations.Controllers
                 return new ObjectResult(response) { StatusCode = response.StatusCode };
             }
 
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(fotoPerfil.FileName);
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(foto.FileName);
             var bucketName = configuration["AWS:BucketName"];
 
-            // Si usas credenciales temporales, asegúrate de agregar el SessionToken
             var credentials = new SessionAWSCredentials(
                 configuration["AWS:AccessKeyId"],
                 configuration["AWS:SecretAccessKey"],
-                configuration["AWS:SessionToken"]  // Agrega el SessionToken
+                configuration["AWS:SessionToken"]
             );
 
             var s3Client = new AmazonS3Client(
                 credentials,
-                new AmazonS3Config { RegionEndpoint = RegionEndpoint.USEast1 } // Usa la región adecuada
+                new AmazonS3Config { RegionEndpoint = RegionEndpoint.USEast1 }
             );
 
             var transferUtility = new TransferUtility(s3Client);
 
-            // Subir archivo a S3
-            await transferUtility.UploadAsync(fotoPerfil.OpenReadStream(), bucketName, fileName);
-
-            // Obtener la URL pública del archivo subido
+            await transferUtility.UploadAsync(foto.OpenReadStream(), bucketName, fileName);
             var fotoPerfilUrl = $"https://{bucketName}.s3.amazonaws.com/{fileName}";
-
-            // Actualizar la entidad Alumno con la URL de la foto
             alumno.fotoPerfilUrl = fotoPerfilUrl;
             await _context.SaveChangesAsync();
 
