@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using Amazon;
 using Amazon.Runtime;
+using Amazon.SimpleNotificationService.Model;
+using Amazon.SimpleNotificationService;
 
 namespace AWSCloudFoundations.Controllers
 {
@@ -188,6 +190,49 @@ namespace AWSCloudFoundations.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { FotoPerfilUrl = fotoPerfilUrl });
+        }
+
+        [HttpPost("{id:int}/email")]
+        public async Task<IActionResult> EnviarEmailAlumno(int id)
+        {
+            // Buscar alumno en la base de datos
+            var alumno = await _context.Alumnos.FirstOrDefaultAsync(x => x.id == id);
+            if (alumno == null)
+            {
+                return NotFound("Alumno no encontrado");
+            }
+
+            // Crear el contenido del mensaje (información del alumno y las calificaciones)
+            var mensaje = $"Hola {alumno.nombres} {alumno.apellidos},\n\n" +
+                          $"Tus calificación general es:\n" +
+                          $"Promedio: {alumno.promedio}\n" +
+                          "¡Gracias por utilizar el sistema de calificaciones!";
+
+            // Configuración del cliente SNS
+            var snsClient = new AmazonSimpleNotificationServiceClient(
+                configuration["AWS:AccessKeyId"],
+                configuration["AWS:SecretAccessKey"],
+                configuration["AWS:SessionToken"],
+                RegionEndpoint.GetBySystemName(configuration["AWS:Region"])
+            );
+
+            // Enviar mensaje al topic SNS
+            var publishRequest = new PublishRequest
+            {
+                TopicArn = configuration["AWS:TopicArn"],  // ARN del topic SNS
+                Message = mensaje,
+                Subject = "Notificación de Calificaciones"
+            };
+
+            try
+            {
+                var response = await snsClient.PublishAsync(publishRequest);
+                return Ok(new { MessageId = response.MessageId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al enviar el mensaje: {ex.Message}");
+            }
         }
 
 

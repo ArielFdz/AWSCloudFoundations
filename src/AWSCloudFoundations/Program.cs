@@ -25,6 +25,8 @@ builder.Services.AddScoped<ITeacherService, TeacherService>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddAWSService<Amazon.SimpleNotificationService.IAmazonSimpleNotificationService>();
+
 
 var app = builder.Build();
 
