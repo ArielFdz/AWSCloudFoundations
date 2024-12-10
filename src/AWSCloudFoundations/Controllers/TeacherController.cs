@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AWSCloudFoundations.Controllers
 {
     [ApiController]
-    [Route("profesores")]
+    [Route("profesores2")]
     public class TeacherController : ControllerBase
     {
         private readonly ITeacherService service;
